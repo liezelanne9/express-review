@@ -14,27 +14,25 @@ class List extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.deleteTodo = this.deleteTodo.bind(this);
+    this.updateTodo = this.updateTodo.bind(this);
   }
 
   componentDidMount() {
-    // grab all the todos
     this.getTodos();
   }
 
   getTodos() {
-    // send GET req to our server
     axios
       .get('/api')
       .then((todos) => {
         this.setState({
           todos: todos.data
-        }, () => console.log(this.state))
+        })
       })
       .catch((err) => console.log(err))
   }
 
   postTodo(todo) {
-    // add todo to our "database" (array)
     console.log(todo)
     axios
       .post('/api', { todo }) // {todo: todo}
@@ -51,14 +49,23 @@ class List extends Component {
   }
 
   handleSubmit(event) {
-    event.preventDefault(); // prevents page from reloading after submit
+    event.preventDefault();
     this.postTodo(this.state.inputField);
-    event.target.reset(); // clears formfield
+    event.target.reset();
   }
 
   deleteTodo(index) {
     axios
-      .delete(`/api/${index}`) // 'localhost:3000/api/index'
+      .delete(`/api/${index}`)
+      .then((response) => {
+        console.log(response.data);
+        this.getTodos();
+      })
+  }
+
+  updateTodo(index, todo) {
+    axios
+      .put(`/api/${index}`, { todo })
       .then((response) => {
         console.log(response.data);
         this.getTodos();
@@ -76,7 +83,14 @@ class List extends Component {
         <h4>Current todos</h4>
         <div>
           {this.state.todos.map((todo, i) => {
-            return <ListEntry todo={todo} idx={i} deleteTodo={this.deleteTodo}/>
+            return <ListEntry 
+            key={i}
+            todo={todo} 
+            idx={i} 
+            getTodos={this.getTodos}
+            deleteTodo={this.deleteTodo} 
+            updateTodo={this.updateTodo}
+            />
           })}
         </div>
       </div>
